@@ -1,0 +1,4 @@
+Screenshots of problematic recipes will end up in this folder so they can be tracked down manually
+As of writing this no recipes end up here
+
+The folder will be cleaned at the beginning of each run so look into errors before running again

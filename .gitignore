@@ -1,0 +1,3 @@
+database.sqlite
+*.png
+node_modules/

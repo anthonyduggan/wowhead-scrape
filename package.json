@@ -1,0 +1,20 @@
+{
+  "name": "wowhead-scrape",
+  "version": "1.0.0",
+  "description": "Scrape wowhead classic for recipe info",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "author": {
+    "name" : "Anthony Duggan",
+    "email" : "aduggan88@gmail.com",
+    "url" : "https://github.com/anthonyduggan"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^1.20.0",
+    "sql-template-strings": "^2.2.2",
+    "sqlite": "^3.0.3"
+  }
+}
