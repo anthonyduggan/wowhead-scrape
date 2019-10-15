@@ -1,13 +1,15 @@
 const puppeteer = require('puppeteer');
-const sqlite = require('sqlite');
-const SQL = require('sql-template-strings');
 const fs = require('fs');
+const professions = require('./professions');
+
+let all_reagents = {};
+let all_spells = {};
 
 // Do everything for a given profession
-async function load_profession_page(db, page, profession) {
+async function load_profession_page(page, profession) {
     // Given a url, return its type (spell, item, etc) and its id
     function get_type_and_id_from_url(url) {
-        const re = /(\w+)=(\d+)$/;
+        const re = /(\w+)=(\d+)/;
         const result = re.exec(url);
         if (result) {
             return {
@@ -16,26 +18,6 @@ async function load_profession_page(db, page, profession) {
             }
         }
         return null;
-    }
-
-    // Given all of the data about a spell, insert as much info about it as possible
-    async function insert_spell(profession_id, id, name, reagents, levels) {
-        // Build the spell query, needs proper escaping since some of the names have weird characters
-        const spellQuery = SQL `insert or ignore into spells (id, name, profession_id, l1, l2, l3, l4) values (${id}, ${name}, ${profession_id}, ${levels[1]}, ${levels[2]}, ${levels[3]}, ${levels[4]})`;
-
-        // Build the item and reagent queries
-        let itemQuery = `insert or ignore into items (id) values`;
-        let reagentQuery = `insert or ignore into reagents (spell_id, item_id) values`;
-        let prefix = ' ';
-        for (let reagent of reagents) {
-            itemQuery += `${prefix}(${reagent})`;
-            reagentQuery += `${prefix}(${id}, ${reagent})`;
-            prefix = ', ';
-        }
-
-        await db.run(spellQuery);
-        await db.run(itemQuery);
-        await db.run(reagentQuery);
     }
 
     console.group(profession.name)
@@ -62,9 +44,23 @@ async function load_profession_page(db, page, profession) {
         for (const recipe of recipe_entries) {
             try {
                 // Get the spell info
-                const spell_name = await recipe.$eval('td:nth-child(3) a', node => node.innerText);
                 const spell_link = await recipe.$eval('td:nth-child(3) a', node => node.href);
                 const spell = get_type_and_id_from_url(spell_link);
+                spell.name = await recipe.$eval('td:nth-child(3) a', node => node.innerText);
+                // Get levels
+                let levels = {1: null,2: null,3: null,4: null,};
+                for (let key of Object.keys(levels)) {
+                    const level_element = await recipe.$(`td:nth-child(6) .r${key}`);
+                    if (level_element) {
+                        const level = await level_element.evaluate(node => parseInt(node.innerText));
+                        levels[key] = level;
+                    }
+                }
+                spell.levels = levels;
+                spell.profession_id = profession.id;
+
+                // Store the spell
+                all_spells[spell.id] = spell;
 
                 // Get reagents from the page
                 const reagent_links = await recipe.$$eval('td:nth-child(4) a', nodes => nodes.map(node => node.href));
@@ -76,33 +72,14 @@ async function load_profession_page(db, page, profession) {
                     return reagent.id;
                 });
 
-                // Get levels
-                let levels = {
-                    1: null,
-                    2: null,
-                    3: null,
-                    4: null,
-                };
-                for (let key of Object.keys(levels)) {
-                    const level_element = await recipe.$(`td:nth-child(6) .r${key}`);
-                    if (level_element) {
-                        const level = await level_element.evaluate(node => parseInt(node.innerText));
-                        levels[key] = level;
+                // Store the reagents and link them to the current spell
+                for (const reagent of reagents) {
+                    if (!all_reagents.hasOwnProperty(reagent)) {
+                        all_reagents[reagent] = [];
                     }
+                    all_reagents[reagent].push(spell.id);
                 }
-                // For now this is not needed, but it might be helpful later
-                // Since levels are listed weird in wowhead start at grey and keep track of the last good level duplicate that for all the missing keys
-                // let last_good_level = null;
-                // for (let key of Object.keys(levels)) {
-                //     if (levels[key] !== null) {
-                //         last_good_level = levels[key];
-                //     } else if (last_good_level !== null) {
-                //         levels[key] = last_good_level;
-                //     }
-                // }
 
-                // Finally insert the spell
-                await insert_spell(profession.id, spell.id, spell_name, reagents, levels);
                 page_spells_created++;
             } catch (err) {
                 // Take a screenshot of the spell we failed to load and just move on to the next iteration
@@ -144,17 +121,14 @@ function clean_bad_spell_screenshots() {
     });
     const page = await browser.newPage();
 
-    // Open the db and migrate
-    const db = await sqlite.open('./database.sqlite');
-    await db.migrate();
-
     // Loop through all of the professions to get all of the relevant spells
-    const professions = await db.all(`select id, name, url from professions`);
-    for (const profession of professions) {
-        await load_profession_page(db, page, profession);
+    for (const [profession_id, profession] of Object.entries(professions)) {
+        await load_profession_page(page, profession);
     }
 
+    console.log('Reagents', Object.keys(all_reagents).length);
+    console.log('Spells', Object.keys(all_spells).length);
+
     // Shut down
-    await db.close();
     await browser.close();
 })();

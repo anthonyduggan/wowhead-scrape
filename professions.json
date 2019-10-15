@@ -1,0 +1,11 @@
+{
+    "129": {"id": 129, "name": "First Aid", "url": "https://classic.wowhead.com/first-aid"},
+    "164": {"id": 164, "name": "Blacksmithing", "url": "https://classic.wowhead.com/blacksmithing"},
+    "165": {"id": 165, "name": "Leatherworking", "url": "https://classic.wowhead.com/leatherworking"},
+    "171": {"id": 171, "name": "Alchemy", "url": "https://classic.wowhead.com/alchemy"},
+    "185": {"id": 185, "name": "Cooking", "url": "https://classic.wowhead.com/cooking"},
+    "186": {"id": 186, "name": "Mining", "url": "https://classic.wowhead.com/mining"},
+    "197": {"id": 197, "name": "Tailoring", "url": "https://classic.wowhead.com/tailoring"},
+    "202": {"id": 202, "name": "Engineering", "url": "https://classic.wowhead.com/engineering"},
+    "333": {"id": 333, "name": "Enchanting", "url": "https://classic.wowhead.com/enchanting"}
+}

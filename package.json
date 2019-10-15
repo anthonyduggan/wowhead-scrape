@@ -7,14 +7,12 @@
     "start": "node main.js"
   },
   "author": {
-    "name" : "Anthony Duggan",
-    "email" : "aduggan88@gmail.com",
-    "url" : "https://github.com/anthonyduggan"
+    "name": "Anthony Duggan",
+    "email": "aduggan88@gmail.com",
+    "url": "https://github.com/anthonyduggan"
   },
   "license": "MIT",
   "dependencies": {
-    "puppeteer": "^1.20.0",
-    "sql-template-strings": "^2.2.2",
-    "sqlite": "^3.0.3"
+    "puppeteer": "^1.20.0"
   }
 }
