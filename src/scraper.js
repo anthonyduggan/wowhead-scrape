@@ -30,7 +30,7 @@ async function scrape_profession(page, profession, all_reagents, all_spells) {
         if (result) {
             return {
                 type: result[1],
-                id: result[2]
+                id: parseInt(result[2])
             }
         }
         return null;
@@ -88,8 +88,13 @@ async function scrape_profession(page, profession, all_reagents, all_spells) {
                         levels[i] = last_known_level;
                     }
                 }
+                // If we didn't get any levels this spell is useless to us
+                if (last_known_level == null) {
+                    continue;
+                }
                 spell.levels = levels;
                 spell.profession_id = profession.id;
+                spell.learned = 0; // Upcoming datapoint, hardcode to zero
 
                 // Store the spell
                 all_spells[spell.id] = spell;
