@@ -22,6 +22,6 @@ function clean_bad_spell_screenshots() {
     const output_structure = builder(all_reagents, all_spells);
     fs.writeFileSync('./output.json', JSON.stringify(output_structure, null, 2));
 
-    const output = object_to_table_string(output_structure);
+    const output = `DATA = ${object_to_table_string(output_structure)}`;
     fs.writeFileSync('./output.lua', output);
 })();
