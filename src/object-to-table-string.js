@@ -16,7 +16,11 @@ function object_to_table_string(object) {
     } else if (typeof object === 'object' && object !== null) {
         let key_strings = [];
         for (const [key, value] of Object.entries(object)) {
-            key_strings.push(`${key}=${object_to_table_string(value)}`);
+            let key_string = key;
+            if (Number.isInteger(parseInt(key_string))) {
+                key_string = `[${key}]`;
+            }
+            key_strings.push(`${key_string}=${object_to_table_string(value)}`);
         }
         return `{${key_strings.join(',')}}`;
     } else {
