@@ -29,7 +29,7 @@ function builder(reagents, spells) {
                 const profession_id = spell.profession_id;
                 delete spell.profession_id;
                 groups[profession_id] = groups[profession_id] || {
-                    profession: professions[profession_id].name,
+                    name: professions[profession_id].name,
                     spells: []
                 };
                 groups[profession_id].spells.push(spell);
